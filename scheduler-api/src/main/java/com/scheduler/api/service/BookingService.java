@@ -18,9 +18,11 @@ public class BookingService {
     public static final Duration CLASS_DURATION = Duration.ofMinutes(20);
 
     private final BookingRepository bookingRepository;
+    private final GoogleCalendarService googleCalendarService;
 
-    public BookingService(BookingRepository bookingRepository) {
+    public BookingService(BookingRepository bookingRepository, GoogleCalendarService googleCalendarService) {
         this.bookingRepository = bookingRepository;
+        this.googleCalendarService = googleCalendarService;
     }
 
     @Transactional
@@ -28,24 +30,33 @@ public class BookingService {
         Instant startTime = request.startTime();
         Instant endTime = startTime.plus(CLASS_DURATION);
 
-        // Check for double-booking conflict
+        // 1. Checa conflito no banco PostgreSQL
         boolean hasConflict = bookingRepository.existsOverlappingBooking(
             startTime, 
             endTime, 
             BookingStatus.CONFIRMED
         );
 
-        // Throw our custom domain exception instead of generic IllegalStateException
         if (hasConflict) {
             throw new SlotConflictException("This 20-minute slot is already booked.");
         }
 
+        // 2. Dispara a criação do evento no Google Calendar
+        String googleEventId = googleCalendarService.createCalendarEvent(
+            request.studentName(),
+            request.studentEmail(),
+            startTime,
+            endTime
+        );
+
+        // 3. Persiste no banco com o ID do evento do Google
         Booking booking = new Booking(
             request.studentName(),
             request.studentEmail(),
             startTime,
             endTime
         );
+        booking.setGoogleCalendarEventId(googleEventId);
 
         Booking saved = bookingRepository.save(booking);
 
