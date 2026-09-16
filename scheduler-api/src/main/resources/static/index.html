@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booky — Agendamento Simples & Fluido</title>
+  <style>
+    :root {
+      --bg-canvas: #f8f6f0;
+      --card-bg: #ffffff;
+      --card-inner: #faf8f5;
+      --brand-slate: #475569;
+      --brand-dark: #1e293b;
+      --brand-accent: #b45309; /* Âmbar / Terracota quente */
+      --brand-accent-hover: #92400e;
+      --brand-accent-soft: #fef3c7;
+      --text-main: #292524;
+      --text-muted: #78716c;
+      --border-subtle: #e7e5e4;
+      --border-warm: #d6d3d1;
+      --shadow-warm: 0 12px 35px -8px rgba(68, 64, 60, 0.08), 0 4px 12px -2px rgba(68, 64, 60, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-canvas);
+      background-image: radial-gradient(#e7e5e4 1px, transparent 1px);
+      background-size: 24px 24px;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    /* Topo com Logo Booky */
+    .brand-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .brand-clock-logo {
+      width: 32px;
+      height: 32px;
+      stroke: var(--brand-slate);
+      stroke-width: 2.2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .brand-name {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.6px;
+      color: var(--brand-dark);
+    }
+
+    .brand-name span {
+      color: var(--brand-accent);
+    }
+
+    /* Card Principal */
+    .booky-card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-warm);
+      display: grid;
+      grid-template-columns: 320px 340px 240px;
+      width: 100%;
+      max-width: 930px;
+      min-height: 520px;
+      overflow: hidden;
+    }
+
+    /* Coluna 1: Informações */
+    .col-profile {
+      padding: 36px 30px;
+      background: var(--card-inner);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .profile-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--brand-slate);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 19px;
+      box-shadow: 0 4px 10px rgba(71, 85, 105, 0.2);
+    }
+
+    .profile-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--brand-dark);
+    }
+
+    .profile-role {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-section {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-main);
+      margin-bottom: auto;
+    }
+
+    .info-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .info-link {
+      color: var(--brand-accent);
+      text-decoration: none;
+      word-break: break-all;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .info-link:hover {
+      color: var(--brand-accent-hover);
+      text-decoration: underline;
+    }
+
+    .meta-group {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .meta-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--brand-slate);
+      font-weight: 500;
+    }
+
+    /* Coluna 2: Calendário */
+    .col-calendar {
+      padding: 36px 24px;
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    .cal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 0 4px;
+    }
+
+    .cal-current-month {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--brand-dark);
+      letter-spacing: -0.2px;
+    }
+
+    .cal-arrow-btn {
+      background: none;
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      color: var(--brand-slate);
+      font-size: 14px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .cal-arrow-btn:hover {
+      border-color: var(--border-warm);
+      background: #f5f5f4;
+    }
+
+    .weekdays-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      row-gap: 8px;
+      justify-items: center;
+    }
+
+    .day-cell {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 50%;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      color: #a8a29e;
+    }
+
+    .day-cell.empty {
+      cursor: default;
+    }
+
+    .day-cell.available {
+      color: var(--brand-dark);
+      font-weight: 600;
+      background: #f5f5f4;
+    }
+
+    .day-cell.available:hover {
+      background: var(--brand-accent-soft);
+      color: var(--brand-accent);
+    }
+
+    .day-cell.selected {
+      background: var(--brand-accent) !important;
+      color: #ffffff !important;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(180, 83, 9, 0.25);
+    }
+
+    .day-cell.disabled {
+      color: #e7e5e4;
+      cursor: not-allowed;
+    }
+
+    /* Coluna 3: Horários */
+    .col-slots {
+      padding: 36px 20px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      max-height: 520px;
+    }
+
+    .slots-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--brand-dark);
+      margin-bottom: 18px;
+    }
+
+    .slots-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .slot-item-btn {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--brand-dark);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slot-item-btn:hover {
+      border-color: var(--brand-accent);
+      color: var(--brand-accent);
+      background: #fffbeb;
+      transform: translateY(-1px);
+    }
+
+    .state-hint {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Modal com visual suave e editorial */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(28, 25, 23, 0.45);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      padding: 36px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .modal-card h2 {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      margin-bottom: 6px;
+    }
+
+    .modal-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .field-group {
+      margin-bottom: 18px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--brand-slate);
+      margin-bottom: 6px;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border-warm);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #fafaf9;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .field-input:focus {
+      border-color: var(--brand-accent);
+      background: #ffffff;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .btn-submit-action {
+      flex: 1;
+      padding: 13px;
+      background: var(--brand-accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-submit-action:hover {
+      background: var(--brand-accent-hover);
+    }
+
+    .btn-cancel-action {
+      padding: 13px 20px;
+      background: #f5f5f4;
+      color: var(--brand-slate);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-cancel-action:hover {
+      background: #e7e5e4;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topo com Logo Booky baseado no relógio minimalista -->
+  <div class="brand-bar">
+    <svg class="brand-clock-logo" viewBox="0 0 100 100">
+      <!-- Círculo do relógio -->
+      <circle cx="50" cy="50" r="44" />
+      <!-- Ponteiro das horas (10h) -->
+      <line x1="50" y1="50" x2="28" y2="34" />
+      <!-- Ponteiro dos minutos (10 min) -->
+      <line x1="50" y1="50" x2="72" y2="28" />
+      <!-- Ponto central -->
+      <circle cx="50" cy="50" r="4.5" fill="var(--brand-slate)" />
+    </svg>
+    <div class="brand-name">Booky<span>.</span></div>
+  </div>
+
+  <div class="booky-card">
+    <!-- Coluna 1: Informações Gerais do Profissional -->
+    <div class="col-profile">
+      <div class="profile-header">
+        <div class="profile-avatar">E</div>
+        <div>
+          <div class="profile-title">Nome do profissional</div>
+          <div class="profile-role">Atendimento Privado</div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <span class="info-label">Link da reunião / Endereço</span>
+        <a href="https://us05web.zoom.us/j/8927448044" target="_blank" class="info-link">
+          https://us05web.zoom.us/j/8927448044
+        </a>
+      </div>
+
+      <div class="meta-group">
+        <div class="meta-pill">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          20 minutos
+        </div>
+        <div class="meta-pill">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          Zoom Meeting
+        </div>
+        <div class="meta-pill">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          (GMT-3) Horário de Brasília
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna 2: Calendário Limpo -->
+    <div class="col-calendar">
+      <div class="cal-top">
+        <button class="cal-arrow-btn" id="prevMonthBtn" title="Mês anterior">&larr;</button>
+        <div class="cal-current-month" id="monthYearLabel"></div>
+        <button class="cal-arrow-btn" id="nextMonthBtn" title="Próximo mês">&rarr;</button>
+      </div>
+
+      <div class="weekdays-header">
+        <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+      </div>
+
+      <div class="days-grid" id="daysGrid"></div>
+    </div>
+
+    <!-- Coluna 3: Horários Disponíveis -->
+    <div class="col-slots">
+      <div class="slots-title" id="selectedDateHeader">Selecione uma data</div>
+      <div class="slots-container" id="slotsList">
+        <div class="state-hint">Escolha um dia disponível no calendário ao lado.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmação Editorial -->
+  <div class="modal-backdrop" id="bookingModal">
+    <div class="modal-card">
+      <h2>Confirmar Horário</h2>
+      <p id="modalSlotDetails"></p>
+
+      <form id="confirmForm">
+        <div class="field-group">
+          <label class="field-label">Seu Nome Completo</label>
+          <input type="text" id="modalStudentName" class="field-input" placeholder="Ex: Maria Silva" required>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Seu E-mail</label>
+          <input type="email" id="modalStudentEmail" class="field-input" placeholder="maria@exemplo.com" required>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel-action" id="cancelModalBtn">Voltar</button>
+          <button type="submit" class="btn-submit-action" id="confirmModalBtn">Agendar Agora</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentDate = new Date();
+    let selectedDate = null;
+    let selectedSlotIso = null;
+
+    const monthYearLabel = document.getElementById('monthYearLabel');
+    const daysGrid = document.getElementById('daysGrid');
+    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+    const selectedDateHeader = document.getElementById('selectedDateHeader');
+    const slotsList = document.getElementById('slotsList');
+
+    const bookingModal = document.getElementById('bookingModal');
+    const modalSlotDetails = document.getElementById('modalSlotDetails');
+    const confirmForm = document.getElementById('confirmForm');
+    const cancelModalBtn = document.getElementById('cancelModalBtn');
+
+    function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+
+      const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                          "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+      monthYearLabel.innerText = `${monthNames[month]} de ${year}`;
+
+      daysGrid.innerHTML = "";
+
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDayIndex; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = "day-cell empty";
+        daysGrid.appendChild(emptyCell);
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      for (let day = 1; day <= totalDays; day++) {
+        const cell = document.createElement('div');
+        cell.className = "day-cell";
+        cell.innerText = day;
+
+        const cellDate = new Date(year, month, day);
+        const dayOfWeek = cellDate.getDay();
+
+        // Bloqueia domingos (0), sábados (6) e dias que já passaram
+        if (cellDate < today || dayOfWeek === 0 || dayOfWeek === 6) {
+          cell.classList.add('disabled');
+        } else {
+          cell.classList.add('available');
+
+          if (selectedDate &&
+              selectedDate.getFullYear() === year &&
+              selectedDate.getMonth() === month &&
+              selectedDate.getDate() === day) {
+            cell.classList.add('selected');
+          }
+
+          cell.addEventListener('click', () => {
+            document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
+            cell.classList.add('selected');
+            selectedDate = cellDate;
+            loadSlotsForDate(cellDate);
+          });
+        }
+
+        daysGrid.appendChild(cell);
+      }
+    }
+
+    async function loadSlotsForDate(date) {
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+
+      const formattedLabel = date.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+      selectedDateHeader.innerText = formattedLabel;
+      slotsList.innerHTML = '<div class="state-hint">Buscando horários disponíveis...</div>';
+
+      try {
+        const response = await fetch(`/api/bookings/availability?date=${dateStr}`);
+        const data = await response.json();
+
+        slotsList.innerHTML = "";
+
+        if (!data.availableSlots || data.availableSlots.length === 0) {
+          slotsList.innerHTML = '<div class="state-hint" style="color: #dc2626;">Nenhum horário disponível para esta data.</div>';
+          return;
+        }
+
+        data.availableSlots.forEach(slotIso => {
+          const slotDate = new Date(slotIso);
+          const timeStr = slotDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          const btn = document.createElement('button');
+          btn.className = "slot-item-btn";
+          btn.innerText = timeStr;
+
+          btn.addEventListener('click', () => {
+            selectedSlotIso = slotIso;
+            modalSlotDetails.innerText = `${formattedLabel} às ${timeStr} (Sessão de 20 minutos)`;
+            bookingModal.style.display = "flex";
+          });
+
+          slotsList.appendChild(btn);
+        });
+      } catch (err) {
+        slotsList.innerHTML = '<div class="state-hint" style="color: #dc2626;">Erro ao carregar horários.</div>';
+      }
+    }
+
+    prevMonthBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderCalendar();
+    });
+
+    nextMonthBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderCalendar();
+    });
+
+    cancelModalBtn.addEventListener('click', () => {
+      bookingModal.style.display = "none";
+    });
+
+    confirmForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const confirmBtn = document.getElementById('confirmModalBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.innerText = "Agendando...";
+
+      const name = document.getElementById('modalStudentName').value.trim();
+      const email = document.getElementById('modalStudentEmail').value.trim();
+
+      try {
+        const response = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            studentName: name,
+            studentEmail: email,
+            startTime: selectedSlotIso
+          })
+        });
+
+        if (response.status === 201) {
+          alert("Agendamento confirmado com sucesso!");
+          bookingModal.style.display = "none";
+          confirmForm.reset();
+          loadSlotsForDate(selectedDate);
+        } else {
+          const errData = await response.json();
+          alert("Erro: " + (errData.message || "Não foi possível agendar"));
+        }
+      } catch (err) {
+        alert("Erro de comunicação com o servidor.");
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerText = "Agendar Agora";
+      }
+    });
+
+    renderCalendar();
+  </script>
+</body>
+</html>
