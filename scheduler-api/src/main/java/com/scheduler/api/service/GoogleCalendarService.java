@@ -36,16 +36,21 @@ public class GoogleCalendarService {
                 GoogleNetHttpTransport.newTrustedTransport(),
                 GsonFactory.getDefaultInstance(),
                 new HttpCredentialsAdapter(credentials)
-        ).setApplicationName("ClassScheduler").build();
+        ).setApplicationName("Booky").build();
     }
 
-    public String createCalendarEvent(String studentName, String studentEmail, Instant start, Instant end) {
+    public String createCalendarEvent(String studentName, String studentEmail, Instant start, Instant end, String zoomJoinUrl) {
         try {
             Calendar service = getCalendarClient();
 
             Event event = new Event()
-                    .setSummary("Aula de Inglês: " + studentName)
-                    .setDescription("Sessão de 20 minutos com " + studentName + "\nE-mail do Aluno: " + studentEmail);
+                    .setSummary("Sessão Booky: " + studentName)
+                    .setLocation(zoomJoinUrl)
+                    .setDescription(
+                        "Sessão de 20 minutos com " + studentName + ".\n\n" +
+                        "Link de Acesso Zoom:\n" + zoomJoinUrl + "\n\n" +
+                        "E-mail do Cliente: " + studentEmail
+                    );
 
             DateTime startDateTime = new DateTime(start.toEpochMilli());
             event.setStart(new EventDateTime().setDateTime(startDateTime));

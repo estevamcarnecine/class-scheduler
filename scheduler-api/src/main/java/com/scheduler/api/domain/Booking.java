@@ -29,6 +29,7 @@ public class Booking {
 
     // We will populate these two when we integrate Google Calendar & Zoom
     private String googleCalendarEventId;
+    private String zoomJoinUrl;
     private String zoomMeetingUrl;
 
     @Column(nullable = false, updatable = false)
@@ -109,5 +110,13 @@ public class Booking {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public String getZoomJoinUrl() {
+        return zoomJoinUrl;
+    }
+
+    public void setZoomJoinUrl(String zoomJoinUrl) {
+        this.zoomJoinUrl = zoomJoinUrl;
     }
 }

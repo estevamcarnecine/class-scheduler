@@ -11,7 +11,8 @@ public record BookingResponse(
     Instant startTime,
     Instant endTime,
     BookingStatus status,
-    String zoomMeetingUrl
+    String googleCalendarEventId,
+    String zoomJoinUrl
 ) {
     public static BookingResponse fromEntity(Booking booking) {
         return new BookingResponse(
@@ -21,7 +22,8 @@ public record BookingResponse(
             booking.getStartTime(),
             booking.getEndTime(),
             booking.getStatus(),
-            booking.getZoomMeetingUrl()
+            booking.getGoogleCalendarEventId(),
+            booking.getZoomJoinUrl()
         );
     }
 }

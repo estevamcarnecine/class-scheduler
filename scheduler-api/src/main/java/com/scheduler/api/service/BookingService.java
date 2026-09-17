@@ -22,10 +22,15 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final GoogleCalendarService googleCalendarService;
+    private final ZoomService zoomService;
 
-    public BookingService(BookingRepository bookingRepository, GoogleCalendarService googleCalendarService) {
+    public BookingService(
+            BookingRepository bookingRepository,
+            GoogleCalendarService googleCalendarService,
+            ZoomService zoomService) {
         this.bookingRepository = bookingRepository;
         this.googleCalendarService = googleCalendarService;
+        this.zoomService = zoomService;
     }
 
     @Transactional
@@ -33,7 +38,7 @@ public class BookingService {
         Instant startTime = request.startTime();
         Instant endTime = startTime.plus(CLASS_DURATION);
 
-        // 1. Checa conflito no banco PostgreSQL
+        // 1. Double-booking check in PostgreSQL
         boolean hasConflict = bookingRepository.existsOverlappingBooking(
             startTime, 
             endTime, 
@@ -44,15 +49,23 @@ public class BookingService {
             throw new SlotConflictException("This 20-minute slot is already booked.");
         }
 
-        // 2. Dispara a criação do evento no Google Calendar
+        // 2. Generate unique Zoom Meeting Room
+        String zoomJoinUrl = zoomService.createMeeting(
+            "Sessão Booky - " + request.studentName(),
+            startTime,
+            20
+        );
+
+        // 3. Dispatch to Google Calendar with unique Zoom URL
         String googleEventId = googleCalendarService.createCalendarEvent(
             request.studentName(),
             request.studentEmail(),
             startTime,
-            endTime
+            endTime,
+            zoomJoinUrl
         );
 
-        // 3. Persiste no banco com o ID do evento do Google
+        // 4. Save entity with Google ID and Zoom URL
         Booking booking = new Booking(
             request.studentName(),
             request.studentEmail(),
@@ -60,6 +73,7 @@ public class BookingService {
             endTime
         );
         booking.setGoogleCalendarEventId(googleEventId);
+        booking.setZoomJoinUrl(zoomJoinUrl);
 
         Booking saved = bookingRepository.save(booking);
 
@@ -68,7 +82,6 @@ public class BookingService {
 
     @Transactional(readOnly = true)
     public AvailabilityResponse getAvailableSlots(LocalDate date) {
-        // Horário de atendimento padrão: 08:00 às 18:00 (Brasília)
         LocalTime workStart = LocalTime.of(8, 0);
         LocalTime workEnd = LocalTime.of(18, 0);
 
@@ -96,7 +109,6 @@ public class BookingService {
                 available.add(slotStart);
             }
 
-            // Intervalo de slots a cada 30 minutos (20 min de aula + 10 min de respiro)
             current = current.plusMinutes(30);
         }
 
