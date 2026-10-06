@@ -66,9 +66,10 @@ public class BookingService {
         );
 
         // 4. Save entity with Google ID and Zoom URL
-        Booking booking = new Booking(
+      Booking booking = new Booking(
             request.studentName(),
             request.studentEmail(),
+            request.studentPhone(),
             startTime,
             endTime
         );

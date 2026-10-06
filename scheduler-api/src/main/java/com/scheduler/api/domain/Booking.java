@@ -18,6 +18,9 @@ public class Booking {
     private String studentEmail;
 
     @Column(nullable = false)
+    private String studentPhone;
+
+    @Column(nullable = false)
     private Instant startTime;
 
     @Column(nullable = false)
@@ -25,29 +28,27 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private BookingStatus status = BookingStatus.CONFIRMED;
+    private BookingStatus status;
 
-    // We will populate these two when we integrate Google Calendar & Zoom
     private String googleCalendarEventId;
+
     private String zoomJoinUrl;
-    private String zoomMeetingUrl;
 
-    @Column(nullable = false, updatable = false)
-    private Instant createdAt = Instant.now();
+    @Column(nullable = false)
+    private boolean whatsappReminderSent = false;
 
-    public Booking() {
-    }
+    public Booking() {}
 
-    public Booking(String studentName, String studentEmail, Instant startTime, Instant endTime) {
+    public Booking(String studentName, String studentEmail, String studentPhone, Instant startTime, Instant endTime) {
         this.studentName = studentName;
         this.studentEmail = studentEmail;
+        this.studentPhone = studentPhone;
         this.startTime = startTime;
         this.endTime = endTime;
         this.status = BookingStatus.CONFIRMED;
-        this.createdAt = Instant.now();
+        this.whatsappReminderSent = false;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -66,6 +67,14 @@ public class Booking {
 
     public void setStudentEmail(String studentEmail) {
         this.studentEmail = studentEmail;
+    }
+
+    public String getStudentPhone() {
+        return studentPhone;
+    }
+
+    public void setStudentPhone(String studentPhone) {
+        this.studentPhone = studentPhone;
     }
 
     public Instant getStartTime() {
@@ -100,23 +109,19 @@ public class Booking {
         this.googleCalendarEventId = googleCalendarEventId;
     }
 
-    public String getZoomMeetingUrl() {
-        return zoomMeetingUrl;
-    }
-
-    public void setZoomMeetingUrl(String zoomMeetingUrl) {
-        this.zoomMeetingUrl = zoomMeetingUrl;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
     public String getZoomJoinUrl() {
         return zoomJoinUrl;
     }
 
     public void setZoomJoinUrl(String zoomJoinUrl) {
         this.zoomJoinUrl = zoomJoinUrl;
+    }
+
+    public boolean isWhatsappReminderSent() {
+        return whatsappReminderSent;
+    }
+
+    public void setWhatsappReminderSent(boolean whatsappReminderSent) {
+        this.whatsappReminderSent = whatsappReminderSent;
     }
 }
